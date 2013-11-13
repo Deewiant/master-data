@@ -1,0 +1,90 @@
+WHERE PMOD(results.mapq,256) = tmp.maxq
+2013-09-26 21:17:19
+2013-09-26 21:17:20
+EXCEPTION
+Query (id=b442ec1f69146c88:be06efa7282477a4):
+  Summary:
+    Start Time: 2013-09-26 21:17:19
+    End Time: 2013-09-26 21:17:20
+    Query Type: DML
+    Query State: EXCEPTION
+    Query Status: Couldn't open transport for cn175:22000(connect() failed: Connection refused)
+    Impala Version: impalad version 1.0.1 RELEASE (build df844fb967cec8740f08dfb8b21962bc053527ef)
+    User: mniemenm
+    Default Db: default
+    Sql Statement: insert OVERWRITE TABLE results
+SELECT results.*
+FROM results
+JOIN
+  (SELECT pos,
+          tlen,
+          MAX(PMOD(mapq,256)) AS maxq
+   FROM results
+   WHERE flag &amp; 4 = 0
+     AND mapq &lt;&gt; -1
+   GROUP BY pos,
+            tlen) tmp ON results.pos = tmp.pos
+AND results.tlen = tmp.tlen
+WHERE PMOD(results.mapq,256) = tmp.maxq
+    Plan: 
+----------------
+PLAN FRAGMENT 0
+  PARTITION: RANDOM
+
+  WRITE TO HDFS table=default.results
+    overwrite=true
+
+  3:HASH JOIN
+  |  join op: INNER JOIN (BROADCAST)
+  |  hash predicates:
+  |    results.pos = &lt;slot 4&gt;
+  |    results.tlen = &lt;slot 5&gt;
+  |    pmod(results.mapq, 256) = &lt;slot 6&gt;
+  |  tuple ids: 0 2 
+  |  
+  |----6:EXCHANGE
+  |       tuple ids: 2 
+  |    
+  0:SCAN HDFS
+     table=default.results #partitions=1 size=12.11KB
+     tuple ids: 0 
+
+PLAN FRAGMENT 1
+  PARTITION: HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  STREAM DATA SINK
+    EXCHANGE ID: 6
+    UNPARTITIONED
+
+  5:AGGREGATE
+  |  output: MAX(&lt;slot 6&gt;)
+  |  group by: &lt;slot 4&gt;, &lt;slot 5&gt;
+  |  tuple ids: 2 
+  |  
+  4:EXCHANGE
+     tuple ids: 2 
+
+PLAN FRAGMENT 2
+  PARTITION: RANDOM
+
+  STREAM DATA SINK
+    EXCHANGE ID: 4
+    HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  2:AGGREGATE
+  |  output: MAX(pmod(mapq, 256))
+  |  group by: pos, tlen
+  |  tuple ids: 2 
+  |  
+  1:SCAN HDFS
+     table=default.results #partitions=1 size=12.11KB
+     predicates: flag &amp; 4 = 0, mapq != -1
+     tuple ids: 1 
+----------------
+    Query Timeline: 725.347ms
+       - Start execution: 2.182ms (2.182ms)
+       - Planning finished: 13.509ms (11.327ms)
+       - Unregister query: 724.957ms (711.447ms)
+  ImpalaServer:
+     - ClientFetchWaitTimer: 0ns
+     - RowMaterializationTimer: 0ns

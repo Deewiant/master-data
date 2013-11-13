@@ -1,0 +1,117 @@
+WHERE PMOD(results.mapq,256) = tmp.maxq
+2013-10-25 08:15:26
+2013-10-25 08:15:27
+EXCEPTION
+Query (id=744fbf8b02fbdf63:48a63db43adba8a2):
+  Summary:
+    Start Time: 2013-10-25 08:15:26
+    End Time: 2013-10-25 08:15:27
+    Query Type: DML
+    Query State: EXCEPTION
+    Query Status: File hdfs://cn186-ib:8020/user/hive/warehouse/results/000000_0 is invalid.  Invalid file footer: +Ýt¯
+    Impala Version: impalad version 1.0.1 RELEASE (build df844fb967cec8740f08dfb8b21962bc053527ef)
+    User: mniemenm
+    Default Db: default
+    Sql Statement: insert OVERWRITE TABLE results
+SELECT results.*
+FROM results
+JOIN
+  (SELECT pos,
+          tlen,
+          MAX(PMOD(mapq,256)) AS maxq
+   FROM results
+   WHERE flag &amp; 4 = 0
+     AND mapq &lt;&gt; -1
+   GROUP BY pos,
+            tlen) tmp ON results.pos = tmp.pos
+AND results.tlen = tmp.tlen
+WHERE PMOD(results.mapq,256) = tmp.maxq
+    Plan: 
+----------------
+PLAN FRAGMENT 0
+  PARTITION: RANDOM
+
+  WRITE TO HDFS table=default.results
+    overwrite=true
+
+  3:HASH JOIN
+  |  join op: INNER JOIN (BROADCAST)
+  |  hash predicates:
+  |    results.pos = &lt;slot 4&gt;
+  |    results.tlen = &lt;slot 5&gt;
+  |    pmod(results.mapq, 256) = &lt;slot 6&gt;
+  |  tuple ids: 0 2 
+  |  
+  |----6:EXCHANGE
+  |       tuple ids: 2 
+  |    
+  0:SCAN HDFS
+     table=default.results #partitions=1 size=800B
+     tuple ids: 0 
+
+PLAN FRAGMENT 1
+  PARTITION: HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  STREAM DATA SINK
+    EXCHANGE ID: 6
+    UNPARTITIONED
+
+  5:AGGREGATE
+  |  output: MAX(&lt;slot 6&gt;)
+  |  group by: &lt;slot 4&gt;, &lt;slot 5&gt;
+  |  tuple ids: 2 
+  |  
+  4:EXCHANGE
+     tuple ids: 2 
+
+PLAN FRAGMENT 2
+  PARTITION: RANDOM
+
+  STREAM DATA SINK
+    EXCHANGE ID: 4
+    HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  2:AGGREGATE
+  |  output: MAX(pmod(mapq, 256))
+  |  group by: pos, tlen
+  |  tuple ids: 2 
+  |  
+  1:SCAN HDFS
+     table=default.results #partitions=1 size=800B
+     predicates: flag &amp; 4 = 0, mapq != -1
+     tuple ids: 1 
+----------------
+    Query Timeline: 538.605ms
+       - Start execution: 2.81ms (2.81ms)
+       - Planning finished: 11.468ms (9.386ms)
+       - Request finished: 499.383ms (487.915ms)
+       - Unregister query: 538.51ms (38.667ms)
+  ImpalaServer:
+     - ClientFetchWaitTimer: 0ns
+     - RowMaterializationTimer: 0ns
+  Execution Profile 744fbf8b02fbdf63:48a63db43adba8a2:(Active: 487.744ms, % non-child: 0.00%)
+     - FinalizationTimer: 0ns
+    Averaged Fragment 0:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:266.530ms  max:270.581ms  mean: 268.555ms  stddev:2.25ms
+      execution rates: min:1.44 KB/sec  max:1.46 KB/sec  mean:1.45 KB/sec  stddev:11.00 B/sec
+      num instances: 2
+    Averaged Fragment 1:
+      split sizes:  min: 0.00 , max: 0.00 , avg: 0.00 , stddev: 0.00 
+      completion times: min:164.117ms  max:166.563ms  mean: 165.340ms  stddev:1.222ms
+      execution rates: min:0.00 /sec  max:0.00 /sec  mean:0.00 /sec  stddev:0.00 /sec
+      num instances: 2
+    Averaged Fragment 2:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:14.398ms  max:17.682ms  mean: 16.40ms  stddev:1.642ms
+      execution rates: min:22.09 KB/sec  max:27.13 KB/sec  mean:24.61 KB/sec  stddev:2.52 KB/sec
+      num instances: 2
+    Fragment 0:
+      Instance 744fbf8b02fbdf63:48a63db43adba8a3 (host=cn188:22000):
+      Instance 744fbf8b02fbdf63:48a63db43adba8a4 (host=cn187:22000):
+    Fragment 1:
+      Instance 744fbf8b02fbdf63:48a63db43adba8a5 (host=cn188:22000):
+      Instance 744fbf8b02fbdf63:48a63db43adba8a6 (host=cn187:22000):
+    Fragment 2:
+      Instance 744fbf8b02fbdf63:48a63db43adba8a7 (host=cn188:22000):
+      Instance 744fbf8b02fbdf63:48a63db43adba8a8 (host=cn187:22000):

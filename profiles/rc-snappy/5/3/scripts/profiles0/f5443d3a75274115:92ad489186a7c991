@@ -1,0 +1,123 @@
+WHERE PMOD(results.mapq,256) = tmp.maxq
+2013-10-18 20:09:26
+2013-10-18 20:09:27
+EXCEPTION
+Query (id=f5443d3a75274115:92ad489186a7c991):
+  Summary:
+    Start Time: 2013-10-18 20:09:26
+    End Time: 2013-10-18 20:09:27
+    Query Type: DML
+    Query State: EXCEPTION
+    Query Status: File hdfs://cn183-ib:8020/user/hive/warehouse/results/000001_0 is invalid.  Invalid file footer: ‰_}@
+    Impala Version: impalad version 1.0.1 RELEASE (build df844fb967cec8740f08dfb8b21962bc053527ef)
+    User: mniemenm
+    Default Db: default
+    Sql Statement: insert OVERWRITE TABLE results
+SELECT results.*
+FROM results
+JOIN
+  (SELECT pos,
+          tlen,
+          MAX(PMOD(mapq,256)) AS maxq
+   FROM results
+   WHERE flag &amp; 4 = 0
+     AND mapq &lt;&gt; -1
+   GROUP BY pos,
+            tlen) tmp ON results.pos = tmp.pos
+AND results.tlen = tmp.tlen
+WHERE PMOD(results.mapq,256) = tmp.maxq
+    Plan: 
+----------------
+PLAN FRAGMENT 0
+  PARTITION: RANDOM
+
+  WRITE TO HDFS table=default.results
+    overwrite=true
+
+  3:HASH JOIN
+  |  join op: INNER JOIN (BROADCAST)
+  |  hash predicates:
+  |    results.pos = &lt;slot 4&gt;
+  |    results.tlen = &lt;slot 5&gt;
+  |    pmod(results.mapq, 256) = &lt;slot 6&gt;
+  |  tuple ids: 0 2 
+  |  
+  |----6:EXCHANGE
+  |       tuple ids: 2 
+  |    
+  0:SCAN HDFS
+     table=default.results #partitions=1 size=1.56KB
+     tuple ids: 0 
+
+PLAN FRAGMENT 1
+  PARTITION: HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  STREAM DATA SINK
+    EXCHANGE ID: 6
+    UNPARTITIONED
+
+  5:AGGREGATE
+  |  output: MAX(&lt;slot 6&gt;)
+  |  group by: &lt;slot 4&gt;, &lt;slot 5&gt;
+  |  tuple ids: 2 
+  |  
+  4:EXCHANGE
+     tuple ids: 2 
+
+PLAN FRAGMENT 2
+  PARTITION: RANDOM
+
+  STREAM DATA SINK
+    EXCHANGE ID: 4
+    HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  2:AGGREGATE
+  |  output: MAX(pmod(mapq, 256))
+  |  group by: pos, tlen
+  |  tuple ids: 2 
+  |  
+  1:SCAN HDFS
+     table=default.results #partitions=1 size=1.56KB
+     predicates: flag &amp; 4 = 0, mapq != -1
+     tuple ids: 1 
+----------------
+    Query Timeline: 541.400ms
+       - Start execution: 2.45ms (2.45ms)
+       - Planning finished: 12.32ms (9.986ms)
+       - Request finished: 503.41ms (491.8ms)
+       - Unregister query: 540.800ms (37.759ms)
+  ImpalaServer:
+     - ClientFetchWaitTimer: 0ns
+     - RowMaterializationTimer: 0ns
+  Execution Profile f5443d3a75274115:92ad489186a7c991:(Active: 490.765ms, % non-child: 0.00%)
+     - FinalizationTimer: 0ns
+    Averaged Fragment 0:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:269.875ms  max:273.831ms  mean: 272.199ms  stddev:1.455ms
+      execution rates: min:1.43 KB/sec  max:1.45 KB/sec  mean:1.43 KB/sec  stddev:7.00 B/sec
+      num instances: 4
+    Averaged Fragment 1:
+      split sizes:  min: 0.00 , max: 0.00 , avg: 0.00 , stddev: 0.00 
+      completion times: min:164.13ms  max:169.337ms  mean: 166.240ms  stddev:2.58ms
+      execution rates: min:0.00 /sec  max:0.00 /sec  mean:0.00 /sec  stddev:0.00 /sec
+      num instances: 4
+    Averaged Fragment 2:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:15.295ms  max:17.390ms  mean: 16.103ms  stddev:799.265us
+      execution rates: min:22.46 KB/sec  max:25.54 KB/sec  mean:24.31 KB/sec  stddev:1.17 KB/sec
+      num instances: 4
+    Fragment 0:
+      Instance f5443d3a75274115:92ad489186a7c992 (host=cn203:22000):
+      Instance f5443d3a75274115:92ad489186a7c993 (host=cn185:22000):
+      Instance f5443d3a75274115:92ad489186a7c994 (host=cn186:22000):
+      Instance f5443d3a75274115:92ad489186a7c995 (host=cn187:22000):
+    Fragment 1:
+      Instance f5443d3a75274115:92ad489186a7c996 (host=cn203:22000):
+      Instance f5443d3a75274115:92ad489186a7c997 (host=cn185:22000):
+      Instance f5443d3a75274115:92ad489186a7c998 (host=cn186:22000):
+      Instance f5443d3a75274115:92ad489186a7c999 (host=cn187:22000):
+    Fragment 2:
+      Instance f5443d3a75274115:92ad489186a7c99a (host=cn203:22000):
+      Instance f5443d3a75274115:92ad489186a7c99b (host=cn185:22000):
+      Instance f5443d3a75274115:92ad489186a7c99c (host=cn186:22000):
+      Instance f5443d3a75274115:92ad489186a7c99d (host=cn187:22000):

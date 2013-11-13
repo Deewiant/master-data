@@ -1,0 +1,1153 @@
+  AND bam.pos + length(bam.seq) >= bed.chromStart
+2013-09-30 12:48:27
+2013-09-30 12:59:29
+FINISHED
+Query (id=a456afdf1958bbc:5bc59d4fd78fb0b5):
+  Summary:
+    Start Time: 2013-09-30 12:48:27
+    End Time: 2013-09-30 12:59:29
+    Query Type: DML
+    Query State: FINISHED
+    Query Status: OK
+    Impala Version: impalad version 1.0.1 RELEASE (build df844fb967cec8740f08dfb8b21962bc053527ef)
+    User: mniemenm
+    Default Db: default
+    Sql Statement: insert OVERWRITE TABLE results
+SELECT DISTINCT bam.qname,
+                bam.flag,
+                bam.rname,
+                bam.pos,
+                bam.mapq,
+                bam.cigar,
+                bam.rnext,
+                bam.pnext,
+                bam.tlen,
+                bam.seq,
+                bam.qual,
+                bam.opts_char,
+                bam.opts_int,
+                bam.opts_float,
+                bam.opts_string,
+                bam.opts_arr_int8,
+                bam.opts_arr_int16,
+                bam.opts_arr_int32,
+                bam.opts_arr_float
+FROM
+  (SELECT *
+   FROM bam
+   WHERE flag &amp; 4 = 0
+     AND seq &lt;&gt; "*") bam
+JOIN bed ON bam.rname = bed.chrom
+WHERE bam.pos &lt;= bed.chromEnd
+  AND bam.pos + length(bam.seq) &gt;= bed.chromStart
+    Plan: 
+----------------
+PLAN FRAGMENT 0
+  PARTITION: HASH_PARTITIONED: &lt;slot 41&gt;, &lt;slot 42&gt;, &lt;slot 43&gt;, &lt;slot 44&gt;, &lt;slot 45&gt;, &lt;slot 46&gt;, &lt;slot 47&gt;, &lt;slot 48&gt;, &lt;slot 49&gt;, &lt;slot 50&gt;, &lt;slot 51&gt;, &lt;slot 52&gt;, &lt;slot 53&gt;, &lt;slot 54&gt;, &lt;slot 55&gt;, &lt;slot 56&gt;, &lt;slot 57&gt;, &lt;slot 58&gt;, &lt;slot 59&gt;
+
+  WRITE TO HDFS table=default.results
+    overwrite=true
+
+  6:AGGREGATE
+  |  group by: &lt;slot 41&gt;, &lt;slot 42&gt;, &lt;slot 43&gt;, &lt;slot 44&gt;, &lt;slot 45&gt;, &lt;slot 46&gt;, &lt;slot 47&gt;, &lt;slot 48&gt;, &lt;slot 49&gt;, &lt;slot 50&gt;, &lt;slot 51&gt;, &lt;slot 52&gt;, &lt;slot 53&gt;, &lt;slot 54&gt;, &lt;slot 55&gt;, &lt;slot 56&gt;, &lt;slot 57&gt;, &lt;slot 58&gt;, &lt;slot 59&gt;
+  |  tuple ids: 3 
+  |  
+  5:EXCHANGE
+     tuple ids: 3 
+
+PLAN FRAGMENT 1
+  PARTITION: RANDOM
+
+  STREAM DATA SINK
+    EXCHANGE ID: 5
+    HASH_PARTITIONED: &lt;slot 41&gt;, &lt;slot 42&gt;, &lt;slot 43&gt;, &lt;slot 44&gt;, &lt;slot 45&gt;, &lt;slot 46&gt;, &lt;slot 47&gt;, &lt;slot 48&gt;, &lt;slot 49&gt;, &lt;slot 50&gt;, &lt;slot 51&gt;, &lt;slot 52&gt;, &lt;slot 53&gt;, &lt;slot 54&gt;, &lt;slot 55&gt;, &lt;slot 56&gt;, &lt;slot 57&gt;, &lt;slot 58&gt;, &lt;slot 59&gt;
+
+  3:AGGREGATE
+  |  group by: bam.qname, bam.flag, bam.rname, bam.pos, bam.mapq, bam.cigar, bam.rnext, bam.pnext, bam.tlen, bam.seq, bam.qual, bam.opts_char, bam.opts_int, bam.opts_float, bam.opts_string, bam.opts_arr_int8, bam.opts_arr_int16, bam.opts_arr_int32, bam.opts_arr_float
+  |  tuple ids: 3 
+  |  
+  2:HASH JOIN
+  |  join op: INNER JOIN (BROADCAST)
+  |  hash predicates:
+  |    bam.rname = bed.chrom
+  |  other predicates: bam.pos &lt;= bed.chromEnd, bam.pos + length(bam.seq) &gt;= bed.chromStart
+  |  tuple ids: 0 2 
+  |  
+  |----4:EXCHANGE
+  |       tuple ids: 2 
+  |    
+  0:SCAN HDFS
+     table=default.bam #partitions=1 size=430.92GB
+     predicates: flag &amp; 4 = 0, seq != '*'
+     tuple ids: 0 
+
+PLAN FRAGMENT 2
+  PARTITION: RANDOM
+
+  STREAM DATA SINK
+    EXCHANGE ID: 4
+    UNPARTITIONED
+
+  1:SCAN HDFS
+     table=default.bed #partitions=1 size=48.72KB compact
+     tuple ids: 2 
+----------------
+    Query Timeline: 11m1s
+       - Start execution: 1.168ms (1.168ms)
+       - Planning finished: 643.445ms (642.277ms)
+       - Request finished: 11m1s (11m1s)
+       - Unregister query: 11m1s (10.786ms)
+  ImpalaServer:
+     - ClientFetchWaitTimer: 0ns
+     - RowMaterializationTimer: 0ns
+  Execution Profile a456afdf1958bbc:5bc59d4fd78fb0b5:(Active: 11m1s, % non-child: 0.00%)
+     - FinalizationTimer: 2.306us
+    Averaged Fragment 0:(Active: 11m, % non-child: 0.00%)
+      split sizes:  min: 0.00 , max: 0.00 , avg: 0.00 , stddev: 0.00 
+      completion times: min:11m  max:11m  mean: 11m  stddev:104.163ms
+      execution rates: min:0.00 /sec  max:0.00 /sec  mean:0.00 /sec  stddev:0.00 /sec
+      num instances: 8
+       - AverageThreadTokens: 1.00 
+       - RowsProduced: 0
+      CodeGen:(Active: 563.639ms, % non-child: 0.08%)
+         - CodegenTime: 14.869ms
+         - CompileTime: 512.549ms
+         - LoadTime: 51.89ms
+         - ModuleFileSize: 74.45 KB
+      HdfsTableSink:(Active: 103.517us, % non-child: 0.00%)
+         - EncodeTimer: 0ns
+         - HdfsWriteTimer: 0ns
+         - MemoryUsed: 0.00 
+         - RowsInserted: 0
+      AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.03%)
+         - BuildBuckets: 1.02K (1024)
+         - BuildTime: 39.355us
+         - GetResultsTime: 274ns
+         - LoadFactor: 0.00 
+         - MemoryUsed: 32.00 KB
+         - RowsReturned: 0
+         - RowsReturnedRate: 0
+      EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.97%)
+         - BytesReceived: 0.00 
+         - ConvertRowBatchTime: 344ns
+         - DataArrivalWaitTime: 11m
+         - DeserializeRowBatchTimer: 0ns
+         - FirstBatchArrivalWaitTime: 0ns
+         - MemoryUsed: 0.00 
+         - RowsReturned: 0
+         - RowsReturnedRate: 0
+         - SendersBlockedTimer: 0ns
+         - SendersBlockedTotalTimer(*): 0ns
+    Averaged Fragment 1:(Active: 9m31s, % non-child: 0.00%)
+      split sizes:  min: 35.61 GB, max: 56.50 GB, avg: 53.87 GB, stddev: 6.90 GB
+      completion times: min:7m39s  max:10m59s  mean: 9m31s  stddev:1m5s
+      execution rates: min:79.44 MB/sec  max:117.93 MB/sec  mean:96.77 MB/sec  stddev:11.10 MB/sec
+      num instances: 8
+       - AverageThreadTokens: 11.18 
+       - RowsProduced: 0
+      CodeGen:(Active: 707.802ms, % non-child: 0.14%)
+         - CodegenTime: 21.817ms
+         - CompileTime: 699.594ms
+         - LoadTime: 8.207ms
+         - ModuleFileSize: 74.45 KB
+      DataStreamSender (dst_id=5):(Active: 14.58us, % non-child: 0.00%)
+         - BytesSent: 0.00 
+         - NetworkThroughput(*): 0.00 /sec
+         - OverallThroughput: 0.00 /sec
+         - SerializeBatchTime: 0ns
+         - ThriftTransmitTime(*): 0ns
+         - UncompressedRowBatchSize: 0.00 
+      AGGREGATION_NODE (id=3):(Active: 9m31s, % non-child: 0.06%)
+         - BuildBuckets: 1.02K (1024)
+         - BuildTime: 2.129us
+         - GetResultsTime: 338ns
+         - LoadFactor: 0.00 
+         - MemoryUsed: 32.00 KB
+         - RowsReturned: 0
+         - RowsReturnedRate: 0
+      HASH_JOIN_NODE (id=2):(Active: 9m31s, % non-child: 0.05%)
+         - BuildBuckets: 1.02K (1024)
+         - BuildRows: 2.40K (2400)
+         - BuildTime: 143.44us
+         - LoadFactor: 0.02 
+         - MemoryUsed: 0.00 
+         - ProbeRows: 0
+         - ProbeTime: 0ns
+         - RowsReturned: 0
+         - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=4):(Active: 66.281us, % non-child: 0.00%)
+           - BytesReceived: 55.32 KB
+           - ConvertRowBatchTime: 53.969us
+           - DataArrivalWaitTime: 0ns
+           - DeserializeRowBatchTimer: 198.894us
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 2.40K (2400)
+           - RowsReturnedRate: 37.39 M/sec
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      HDFS_SCAN_NODE (id=0):(Active: 9m31s, % non-child: 99.90%)
+         - AverageHdfsReadThreadConcurrency: 0.91 
+         - AverageIoMgrQueueCapacity: 256.00 
+         - AverageIoMgrQueueSize: 0.00 
+         - AverageScannerThreadConcurrency: 0.38 
+         - BytesRead: 53.87 GB
+         - BytesSkipped: 28.30 GB
+         - DecompressionTime: 0ns
+         - MemoryUsed: 3.53 GB
+         - NumDisksAccessed: 3
+         - PerReadThreadRawHdfsThroughput: 106.81 MB/sec
+         - RowsRead: 0
+         - RowsReturned: 0
+         - RowsReturnedRate: 0
+         - ScanRangesComplete: 904
+         - ScannerThreadsInvoluntaryContextSwitches: 32.87K (32874)
+         - ScannerThreadsTotalWallClockTime: 1h33m
+           - MaterializeTupleTime(*): 0ns
+           - ScannerThreadsSysTime: 45s409ms
+           - ScannerThreadsUserTime: 2m56s
+         - ScannerThreadsVoluntaryContextSwitches: 387.89K (387887)
+         - TotalRawHdfsReadTime(*): 8m40s
+         - TotalReadThroughput: 96.67 MB/sec
+    Averaged Fragment 2:(Active: 29.80ms, % non-child: 0.00%)
+      split sizes:  min: 48.72 KB, max: 48.72 KB, avg: 48.72 KB, stddev: 0.00 
+      completion times: min:30.702ms  max:30.702ms  mean: 30.702ms  stddev:0ns
+      execution rates: min:1.55 MB/sec  max:1.55 MB/sec  mean:1.55 MB/sec  stddev:0.00 /sec
+      num instances: 1
+       - AverageThreadTokens: 1.00 
+       - RowsProduced: 2.40K (2400)
+      CodeGen:(Active: 69.532ms, % non-child: 100.00%)
+         - CodegenTime: 377ns
+         - CompileTime: 60.751ms
+         - LoadTime: 8.780ms
+         - ModuleFileSize: 74.45 KB
+      DataStreamSender (dst_id=4):(Active: 4.109ms, % non-child: 14.13%)
+         - BytesSent: 55.32 KB
+         - NetworkThroughput(*): 2.20 MB/sec
+         - OverallThroughput: 13.15 MB/sec
+         - SerializeBatchTime: 699.766us
+         - ThriftTransmitTime(*): 24.603ms
+         - UncompressedRowBatchSize: 88.00 KB
+      HDFS_SCAN_NODE (id=1):(Active: 24.908ms, % non-child: 85.65%)
+         - AverageHdfsReadThreadConcurrency: 0.00 
+         - AverageIoMgrQueueCapacity: 0.00 
+         - AverageIoMgrQueueSize: 0.00 
+         - AverageScannerThreadConcurrency: 0.00 
+         - BytesRead: 48.72 KB
+         - MemoryUsed: 32.00 B
+         - NumDisksAccessed: 1
+         - PerReadThreadRawHdfsThroughput: 3.77 GB/sec
+         - RowsRead: 2.40K (2400)
+         - RowsReturned: 2.40K (2400)
+         - RowsReturnedRate: 96.35 K/sec
+         - ScanRangesComplete: 1
+         - ScannerThreadsInvoluntaryContextSwitches: 0
+         - ScannerThreadsTotalWallClockTime: 1.849ms
+           - DelimiterParseTime: 143.814us
+           - MaterializeTupleTime(*): 434.719us
+           - ScannerThreadsSysTime: 0ns
+           - ScannerThreadsUserTime: 0ns
+         - ScannerThreadsVoluntaryContextSwitches: 1
+         - TotalRawHdfsReadTime(*): 12.315us
+         - TotalReadThroughput: 0.00 /sec
+    Fragment 0:
+      Instance a456afdf1958bbc:5bc59d4fd78fb0ba (host=cn161:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 523.762ms, % non-child: 0.08%)
+           - CodegenTime: 15.951ms
+           - CompileTime: 513.34ms
+           - LoadTime: 10.727ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 60.190us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 284.634us
+           - GetResultsTime: 262ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.96%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 260ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      Instance a456afdf1958bbc:5bc59d4fd78fb0bd (host=cn173:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 523.609ms, % non-child: 0.08%)
+           - CodegenTime: 13.320ms
+           - CompileTime: 508.330ms
+           - LoadTime: 15.278ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 102.314us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.03%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 5.21us
+           - GetResultsTime: 282ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.97%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 529ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      Instance a456afdf1958bbc:5bc59d4fd78fb0bc (host=cn166:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 525.353ms, % non-child: 0.08%)
+           - CodegenTime: 17.296ms
+           - CompileTime: 516.800ms
+           - LoadTime: 8.552ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 156.469us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 5.208us
+           - GetResultsTime: 289ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.97%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 331ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      Instance a456afdf1958bbc:5bc59d4fd78fb0b7 (host=cn168:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 523.283ms, % non-child: 0.08%)
+           - CodegenTime: 13.78ms
+           - CompileTime: 511.324ms
+           - LoadTime: 11.958ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 105.627us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.03%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 4.605us
+           - GetResultsTime: 297ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.97%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 295ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      Instance a456afdf1958bbc:5bc59d4fd78fb0b8 (host=cn163:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 526.143ms, % non-child: 0.08%)
+           - CodegenTime: 13.336ms
+           - CompileTime: 514.344ms
+           - LoadTime: 11.798ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 96.562us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.03%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 3.402us
+           - GetResultsTime: 167ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.97%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 390ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      Instance a456afdf1958bbc:5bc59d4fd78fb0bb (host=cn169:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 516.956ms, % non-child: 0.08%)
+           - CodegenTime: 15.668ms
+           - CompileTime: 508.785ms
+           - LoadTime: 8.170ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 122.842us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.03%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 3.950us
+           - GetResultsTime: 289ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.97%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 335ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      Instance a456afdf1958bbc:5bc59d4fd78fb0b6 (host=cn170:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 523.50ms, % non-child: 0.08%)
+           - CodegenTime: 15.268ms
+           - CompileTime: 511.800ms
+           - LoadTime: 11.249ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 132.922us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.03%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 3.997us
+           - GetResultsTime: 325ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.97%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 281ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+      Instance a456afdf1958bbc:5bc59d4fd78fb0b9 (host=cn156:22000):(Active: 11m, % non-child: 0.00%)
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 0
+        CodeGen:(Active: 846.959ms, % non-child: 0.13%)
+           - CodegenTime: 15.34ms
+           - CompileTime: 515.974ms
+           - LoadTime: 330.983ms
+           - ModuleFileSize: 74.45 KB
+        HdfsTableSink:(Active: 51.213us, % non-child: 0.00%)
+           - EncodeTimer: 0ns
+           - HdfsWriteTimer: 0ns
+           - MemoryUsed: 0.00 
+           - RowsInserted: 0
+        AGGREGATION_NODE (id=6):(Active: 11m, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 4.28us
+           - GetResultsTime: 288ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        EXCHANGE_NODE (id=5):(Active: 11m, % non-child: 99.96%)
+           - BytesReceived: 0.00 
+           - ConvertRowBatchTime: 338ns
+           - DataArrivalWaitTime: 11m
+           - DeserializeRowBatchTimer: 0ns
+           - FirstBatchArrivalWaitTime: 0ns
+           - MemoryUsed: 0.00 
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - SendersBlockedTimer: 0ns
+           - SendersBlockedTotalTimer(*): 0ns
+    Fragment 1:
+      Instance a456afdf1958bbc:5bc59d4fd78fb0c0 (host=cn163:22000):(Active: 10m59s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.45 GB 
+         - AverageThreadTokens: 11.70 
+         - RowsProduced: 0
+        CodeGen:(Active: 705.135ms, % non-child: 0.11%)
+           - CodegenTime: 20.398ms
+           - CompileTime: 697.37ms
+           - LoadTime: 8.97ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 12.925us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 10m59s, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 2.585us
+           - GetResultsTime: 293ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 10m59s, % non-child: 0.03%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 153.261us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 70.589us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 58.280us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 146.196us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 34.00 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 10m59s, % non-child: 99.93%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.45 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:7.663% 1:91.88% 2:0.1517% 3:0.3035% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:904 
+          ExecOption: Codegen enabled: 0 out of 1807
+           - AverageHdfsReadThreadConcurrency: 0.93 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.35 
+           - BytesRead: 56.45 GB
+           - BytesSkipped: 29.63 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.53 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 94.63 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 904
+           - ScannerThreadsInvoluntaryContextSwitches: 35.10K (35098)
+           - ScannerThreadsTotalWallClockTime: 1h55m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 51s019ms
+             - ScannerThreadsUserTime: 3m6s
+           - ScannerThreadsVoluntaryContextSwitches: 409.79K (409792)
+           - TotalRawHdfsReadTime(*): 10m10s
+           - TotalReadThroughput: 87.53 MB/sec
+      Instance a456afdf1958bbc:5bc59d4fd78fb0c5 (host=cn173:22000):(Active: 10m33s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.50 GB 
+         - AverageThreadTokens: 11.14 
+         - RowsProduced: 0
+        CodeGen:(Active: 708.693ms, % non-child: 0.11%)
+           - CodegenTime: 22.57ms
+           - CompileTime: 699.427ms
+           - LoadTime: 9.265ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 14.389us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 10m33s, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 1.856us
+           - GetResultsTime: 321ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 10m32s, % non-child: 0.03%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 153.740us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 70.354us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 57.786us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 257.302us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 34.11 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 10m32s, % non-child: 99.93%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.50 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:10.2% 1:89.57% 2:0.2372% 3:0% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:904 
+          ExecOption: Codegen enabled: 0 out of 1807
+           - AverageHdfsReadThreadConcurrency: 0.90 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.37 
+           - BytesRead: 56.50 GB
+           - BytesSkipped: 29.64 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.53 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 101.12 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 904
+           - ScannerThreadsInvoluntaryContextSwitches: 31.59K (31589)
+           - ScannerThreadsTotalWallClockTime: 1h44m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 46s393ms
+             - ScannerThreadsUserTime: 3m4s
+           - ScannerThreadsVoluntaryContextSwitches: 408.71K (408714)
+           - TotalRawHdfsReadTime(*): 9m32s
+           - TotalReadThroughput: 91.25 MB/sec
+      Instance a456afdf1958bbc:5bc59d4fd78fb0c2 (host=cn161:22000):(Active: 10m28s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.50 GB 
+         - AverageThreadTokens: 9.16 
+         - RowsProduced: 0
+        CodeGen:(Active: 704.806ms, % non-child: 0.11%)
+           - CodegenTime: 23.564ms
+           - CompileTime: 694.858ms
+           - LoadTime: 9.947ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 14.893us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 10m28s, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 2.205us
+           - GetResultsTime: 268ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 10m28s, % non-child: 0.03%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 92.786us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 41.319us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 31.816us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 235.654us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 58.08 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 10m27s, % non-child: 99.93%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.50 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:8.519% 1:91% 2:0.3981% 3:0.07962% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:904 
+          ExecOption: Codegen enabled: 0 out of 1807
+           - AverageHdfsReadThreadConcurrency: 0.92 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.36 
+           - BytesRead: 56.50 GB
+           - BytesSkipped: 29.62 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.53 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 100.68 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 904
+           - ScannerThreadsInvoluntaryContextSwitches: 30.61K (30611)
+           - ScannerThreadsTotalWallClockTime: 1h23m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 50s334ms
+             - ScannerThreadsUserTime: 3m6s
+           - ScannerThreadsVoluntaryContextSwitches: 409.15K (409152)
+           - TotalRawHdfsReadTime(*): 9m34s
+           - TotalReadThroughput: 91.98 MB/sec
+      Instance a456afdf1958bbc:5bc59d4fd78fb0c4 (host=cn166:22000):(Active: 9m47s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:905/56.49 GB 
+         - AverageThreadTokens: 9.82 
+         - RowsProduced: 0
+        CodeGen:(Active: 711.117ms, % non-child: 0.12%)
+           - CodegenTime: 21.161ms
+           - CompileTime: 702.592ms
+           - LoadTime: 8.524ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 16.997us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 9m47s, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 1.748us
+           - GetResultsTime: 156ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 9m47s, % non-child: 0.04%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 150.995us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 70.895us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 58.141us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 241.226us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 33.85 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 9m47s, % non-child: 99.92%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:905/56.49 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:9.881% 1:90.03% 2:0.08518% 3:0% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:905 
+          ExecOption: Codegen enabled: 0 out of 1808
+           - AverageHdfsReadThreadConcurrency: 0.90 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.40 
+           - BytesRead: 56.49 GB
+           - BytesSkipped: 29.68 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.54 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 107.67 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 905
+           - ScannerThreadsInvoluntaryContextSwitches: 33.80K (33802)
+           - ScannerThreadsTotalWallClockTime: 1h24m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 47s694ms
+             - ScannerThreadsUserTime: 3m7s
+           - ScannerThreadsVoluntaryContextSwitches: 404.49K (404486)
+           - TotalRawHdfsReadTime(*): 8m57s
+           - TotalReadThroughput: 98.38 MB/sec
+      Instance a456afdf1958bbc:5bc59d4fd78fb0c1 (host=cn156:22000):(Active: 9m26s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.44 GB 
+         - AverageThreadTokens: 9.68 
+         - RowsProduced: 0
+        CodeGen:(Active: 717.216ms, % non-child: 0.13%)
+           - CodegenTime: 21.155ms
+           - CompileTime: 710.462ms
+           - LoadTime: 6.752ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 13.793us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 9m26s, % non-child: 0.05%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 1.910us
+           - GetResultsTime: 253ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 9m26s, % non-child: 0.04%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 123.395us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 67.513us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 56.962us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 205.875us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 35.55 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 9m25s, % non-child: 99.92%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.44 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:9.982% 1:88.25% 2:1.502% 3:0.265% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:904 
+          ExecOption: Codegen enabled: 0 out of 1806
+           - AverageHdfsReadThreadConcurrency: 0.92 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.39 
+           - BytesRead: 56.44 GB
+           - BytesSkipped: 29.67 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.53 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 109.53 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 904
+           - ScannerThreadsInvoluntaryContextSwitches: 33.70K (33698)
+           - ScannerThreadsTotalWallClockTime: 1h19m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 47s519ms
+             - ScannerThreadsUserTime: 3m5s
+           - ScannerThreadsVoluntaryContextSwitches: 407.11K (407110)
+           - TotalRawHdfsReadTime(*): 8m47s
+           - TotalReadThroughput: 101.94 MB/sec
+      Instance a456afdf1958bbc:5bc59d4fd78fb0bf (host=cn168:22000):(Active: 9m9s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.47 GB 
+         - AverageThreadTokens: 11.14 
+         - RowsProduced: 0
+        CodeGen:(Active: 700.414ms, % non-child: 0.13%)
+           - CodegenTime: 20.721ms
+           - CompileTime: 693.143ms
+           - LoadTime: 7.270ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 13.575us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 9m9s, % non-child: 0.04%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 2.85us
+           - GetResultsTime: 450ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 9m9s, % non-child: 0.04%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 168.600us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 72.43us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 59.23us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 139.188us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 33.31 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 9m9s, % non-child: 99.92%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.47 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:10.11% 1:89.89% 2:0% 3:0% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:904 
+          ExecOption: Codegen enabled: 0 out of 1807
+           - AverageHdfsReadThreadConcurrency: 0.90 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.43 
+           - BytesRead: 56.47 GB
+           - BytesSkipped: 29.96 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.53 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 117.76 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 904
+           - ScannerThreadsInvoluntaryContextSwitches: 36.33K (36330)
+           - ScannerThreadsTotalWallClockTime: 1h31m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 46s141ms
+             - ScannerThreadsUserTime: 3m5s
+           - ScannerThreadsVoluntaryContextSwitches: 412.21K (412215)
+           - TotalRawHdfsReadTime(*): 8m11s
+           - TotalReadThroughput: 105.14 MB/sec
+      Instance a456afdf1958bbc:5bc59d4fd78fb0be (host=cn170:22000):(Active: 8m10s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.46 GB 
+         - AverageThreadTokens: 9.44 
+         - RowsProduced: 0
+        CodeGen:(Active: 705.530ms, % non-child: 0.14%)
+           - CodegenTime: 24.573ms
+           - CompileTime: 696.222ms
+           - LoadTime: 9.306ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 13.407us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 8m10s, % non-child: 0.06%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 3.155us
+           - GetResultsTime: 487ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 8m9s, % non-child: 0.05%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 123.990us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 63.653us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 50.799us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 232.779us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 37.70 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 8m9s, % non-child: 99.90%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/56.46 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:14.61% 1:85.39% 2:0% 3:0% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:904 
+          ExecOption: Codegen enabled: 0 out of 1807
+           - AverageHdfsReadThreadConcurrency: 0.85 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.46 
+           - BytesRead: 56.46 GB
+           - BytesSkipped: 29.59 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.53 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 139.58 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 904
+           - ScannerThreadsInvoluntaryContextSwitches: 36.71K (36706)
+           - ScannerThreadsTotalWallClockTime: 1h6m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 45s350ms
+             - ScannerThreadsUserTime: 3m5s
+           - ScannerThreadsVoluntaryContextSwitches: 410.33K (410328)
+           - TotalRawHdfsReadTime(*): 6m54s
+           - TotalReadThroughput: 117.84 MB/sec
+      Instance a456afdf1958bbc:5bc59d4fd78fb0c3 (host=cn169:22000):(Active: 7m39s, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/35.61 GB 
+         - AverageThreadTokens: 17.38 
+         - RowsProduced: 0
+        CodeGen:(Active: 709.507ms, % non-child: 0.15%)
+           - CodegenTime: 20.903ms
+           - CompileTime: 703.10ms
+           - LoadTime: 6.496ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=5):(Active: 12.489us, % non-child: 0.00%)
+           - BytesSent: 0.00 
+           - NetworkThroughput(*): 0.00 /sec
+           - OverallThroughput: 0.00 /sec
+           - SerializeBatchTime: 0ns
+           - ThriftTransmitTime(*): 0ns
+           - UncompressedRowBatchSize: 0.00 
+        AGGREGATION_NODE (id=3):(Active: 7m39s, % non-child: 0.06%)
+          ExecOption: Codegen Enabled
+           - BuildBuckets: 1.02K (1024)
+           - BuildTime: 1.490us
+           - GetResultsTime: 480ns
+           - LoadFactor: 0.00 
+           - MemoryUsed: 32.00 KB
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+        HASH_JOIN_NODE (id=2):(Active: 7m38s, % non-child: 0.02%)
+          ExecOption: Build Side Codegen Enabled, Probe Side Codegen Enabled, Hash Table Built Asynchronously
+           - BuildBuckets: 1.02K (1024)
+           - BuildRows: 2.40K (2400)
+           - BuildTime: 177.588us
+           - LoadFactor: 0.02 
+           - MemoryUsed: 0.00 
+           - ProbeRows: 0
+           - ProbeTime: 0ns
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+          EXCHANGE_NODE (id=4):(Active: 73.889us, % non-child: 0.00%)
+             - BytesReceived: 55.32 KB
+             - ConvertRowBatchTime: 58.950us
+             - DataArrivalWaitTime: 0ns
+             - DeserializeRowBatchTimer: 132.933us
+             - FirstBatchArrivalWaitTime: 0ns
+             - MemoryUsed: 0.00 
+             - RowsReturned: 2.40K (2400)
+             - RowsReturnedRate: 32.48 M/sec
+             - SendersBlockedTimer: 0ns
+             - SendersBlockedTotalTimer(*): 0ns
+        HDFS_SCAN_NODE (id=0):(Active: 7m38s, % non-child: 99.92%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:904/35.61 GB 
+          Hdfs Read Thread Concurrency Bucket: 0:3.708% 1:96.29% 2:0% 3:0% 
+          File Formats: RC_FILE/SNAPPY_BLOCKED:904 
+          ExecOption: Codegen enabled: 0 out of 1806
+           - AverageHdfsReadThreadConcurrency: 0.96 
+           - AverageIoMgrQueueCapacity: 256.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.30 
+           - BytesRead: 35.61 GB
+           - BytesSkipped: 18.62 GB
+           - DecompressionTime: 0ns
+           - MemoryUsed: 3.53 GB
+           - NumDisksAccessed: 3
+           - PerReadThreadRawHdfsThroughput: 83.55 MB/sec
+           - RowsRead: 0
+           - RowsReturned: 0
+           - RowsReturnedRate: 0
+           - ScanRangesComplete: 904
+           - ScannerThreadsInvoluntaryContextSwitches: 25.16K (25160)
+           - ScannerThreadsTotalWallClockTime: 2h3m
+             - MaterializeTupleTime(*): 0ns
+             - ScannerThreadsSysTime: 28s819ms
+             - ScannerThreadsUserTime: 1m53s
+           - ScannerThreadsVoluntaryContextSwitches: 241.30K (241303)
+           - TotalRawHdfsReadTime(*): 7m16s
+           - TotalReadThroughput: 79.32 MB/sec
+    Fragment 2:
+      Instance a456afdf1958bbc:5bc59d4fd78fb0c6 (host=cn156:22000):(Active: 29.80ms, % non-child: 0.00%)
+        Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:1/48.72 KB 
+         - AverageThreadTokens: 1.00 
+         - RowsProduced: 2.40K (2400)
+        CodeGen:(Active: 69.532ms, % non-child: 100.00%)
+           - CodegenTime: 377ns
+           - CompileTime: 60.751ms
+           - LoadTime: 8.780ms
+           - ModuleFileSize: 74.45 KB
+        DataStreamSender (dst_id=4):(Active: 4.109ms, % non-child: 14.13%)
+           - BytesSent: 55.32 KB
+           - NetworkThroughput(*): 2.20 MB/sec
+           - OverallThroughput: 13.15 MB/sec
+           - SerializeBatchTime: 699.766us
+           - ThriftTransmitTime(*): 24.603ms
+           - UncompressedRowBatchSize: 88.00 KB
+        HDFS_SCAN_NODE (id=1):(Active: 24.908ms, % non-child: 85.65%)
+          Hdfs split stats (&lt;volume id&gt;:&lt;# splits&gt;/&lt;split lengths&gt;): 0:1/48.72 KB 
+          Hdfs Read Thread Concurrency Bucket: 0:0% 1:0% 2:0% 3:0% 
+          File Formats: TEXT/NONE:1 
+          ExecOption: Codegen enabled: 0 out of 1
+           - AverageHdfsReadThreadConcurrency: 0.00 
+           - AverageIoMgrQueueCapacity: 0.00 
+           - AverageIoMgrQueueSize: 0.00 
+           - AverageScannerThreadConcurrency: 0.00 
+           - BytesRead: 48.72 KB
+           - MemoryUsed: 32.00 B
+           - NumDisksAccessed: 1
+           - PerReadThreadRawHdfsThroughput: 3.77 GB/sec
+           - RowsRead: 2.40K (2400)
+           - RowsReturned: 2.40K (2400)
+           - RowsReturnedRate: 96.35 K/sec
+           - ScanRangesComplete: 1
+           - ScannerThreadsInvoluntaryContextSwitches: 0
+           - ScannerThreadsTotalWallClockTime: 1.849ms
+             - DelimiterParseTime: 143.814us
+             - MaterializeTupleTime(*): 434.719us
+             - ScannerThreadsSysTime: 0ns
+             - ScannerThreadsUserTime: 0ns
+           - ScannerThreadsVoluntaryContextSwitches: 1
+           - TotalRawHdfsReadTime(*): 12.315us
+           - TotalReadThroughput: 0.00 /sec

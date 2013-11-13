@@ -1,0 +1,123 @@
+WHERE PMOD(results.mapq,256) = tmp.maxq
+2013-10-18 19:26:13
+2013-10-18 19:26:13
+EXCEPTION
+Query (id=7842f9453fe67f4f:651cfbea76111887):
+  Summary:
+    Start Time: 2013-10-18 19:26:13
+    End Time: 2013-10-18 19:26:13
+    Query Type: DML
+    Query State: EXCEPTION
+    Query Status: File hdfs://cn148-ib:8020/user/hive/warehouse/results/000001_0 is invalid.  Invalid file footer: Ûﬂl
+    Impala Version: impalad version 1.0.1 RELEASE (build df844fb967cec8740f08dfb8b21962bc053527ef)
+    User: mniemenm
+    Default Db: default
+    Sql Statement: insert OVERWRITE TABLE results
+SELECT results.*
+FROM results
+JOIN
+  (SELECT pos,
+          tlen,
+          MAX(PMOD(mapq,256)) AS maxq
+   FROM results
+   WHERE flag &amp; 4 = 0
+     AND mapq &lt;&gt; -1
+   GROUP BY pos,
+            tlen) tmp ON results.pos = tmp.pos
+AND results.tlen = tmp.tlen
+WHERE PMOD(results.mapq,256) = tmp.maxq
+    Plan: 
+----------------
+PLAN FRAGMENT 0
+  PARTITION: RANDOM
+
+  WRITE TO HDFS table=default.results
+    overwrite=true
+
+  3:HASH JOIN
+  |  join op: INNER JOIN (BROADCAST)
+  |  hash predicates:
+  |    results.pos = &lt;slot 4&gt;
+  |    results.tlen = &lt;slot 5&gt;
+  |    pmod(results.mapq, 256) = &lt;slot 6&gt;
+  |  tuple ids: 0 2 
+  |  
+  |----6:EXCHANGE
+  |       tuple ids: 2 
+  |    
+  0:SCAN HDFS
+     table=default.results #partitions=1 size=1.56KB
+     tuple ids: 0 
+
+PLAN FRAGMENT 1
+  PARTITION: HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  STREAM DATA SINK
+    EXCHANGE ID: 6
+    UNPARTITIONED
+
+  5:AGGREGATE
+  |  output: MAX(&lt;slot 6&gt;)
+  |  group by: &lt;slot 4&gt;, &lt;slot 5&gt;
+  |  tuple ids: 2 
+  |  
+  4:EXCHANGE
+     tuple ids: 2 
+
+PLAN FRAGMENT 2
+  PARTITION: RANDOM
+
+  STREAM DATA SINK
+    EXCHANGE ID: 4
+    HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  2:AGGREGATE
+  |  output: MAX(pmod(mapq, 256))
+  |  group by: pos, tlen
+  |  tuple ids: 2 
+  |  
+  1:SCAN HDFS
+     table=default.results #partitions=1 size=1.56KB
+     predicates: flag &amp; 4 = 0, mapq != -1
+     tuple ids: 1 
+----------------
+    Query Timeline: 543.281ms
+       - Start execution: 2.25ms (2.25ms)
+       - Planning finished: 12.508ms (10.483ms)
+       - Request finished: 503.974ms (491.466ms)
+       - Unregister query: 542.691ms (38.717ms)
+  ImpalaServer:
+     - ClientFetchWaitTimer: 0ns
+     - RowMaterializationTimer: 0ns
+  Execution Profile 7842f9453fe67f4f:651cfbea76111887:(Active: 491.214ms, % non-child: 0.00%)
+     - FinalizationTimer: 0ns
+    Averaged Fragment 0:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:270.387ms  max:271.566ms  mean: 271.167ms  stddev:472.898us
+      execution rates: min:1.44 KB/sec  max:1.44 KB/sec  mean:1.44 KB/sec  stddev:2.00 B/sec
+      num instances: 4
+    Averaged Fragment 1:
+      split sizes:  min: 0.00 , max: 0.00 , avg: 0.00 , stddev: 0.00 
+      completion times: min:166.69ms  max:171.74ms  mean: 169.166ms  stddev:2.10ms
+      execution rates: min:0.00 /sec  max:0.00 /sec  mean:0.00 /sec  stddev:0.00 /sec
+      num instances: 4
+    Averaged Fragment 2:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:14.565ms  max:20.215ms  mean: 17.198ms  stddev:2.75ms
+      execution rates: min:19.32 KB/sec  max:26.82 KB/sec  mean:23.04 KB/sec  stddev:2.74 KB/sec
+      num instances: 4
+    Fragment 0:
+      Instance 7842f9453fe67f4f:651cfbea76111888 (host=cn197:22000):
+      Instance 7842f9453fe67f4f:651cfbea76111889 (host=cn182:22000):
+      Instance 7842f9453fe67f4f:651cfbea7611188a (host=cn202:22000):
+      Instance 7842f9453fe67f4f:651cfbea7611188b (host=cn184:22000):
+    Fragment 1:
+      Instance 7842f9453fe67f4f:651cfbea7611188c (host=cn197:22000):
+      Instance 7842f9453fe67f4f:651cfbea7611188d (host=cn182:22000):
+      Instance 7842f9453fe67f4f:651cfbea7611188e (host=cn202:22000):
+      Instance 7842f9453fe67f4f:651cfbea7611188f (host=cn184:22000):
+    Fragment 2:
+      Instance 7842f9453fe67f4f:651cfbea76111890 (host=cn197:22000):
+      Instance 7842f9453fe67f4f:651cfbea76111891 (host=cn182:22000):
+      Instance 7842f9453fe67f4f:651cfbea76111892 (host=cn202:22000):
+      Instance 7842f9453fe67f4f:651cfbea76111893 (host=cn184:22000):

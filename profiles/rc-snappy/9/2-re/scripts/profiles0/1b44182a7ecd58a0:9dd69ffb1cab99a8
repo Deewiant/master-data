@@ -1,0 +1,135 @@
+WHERE PMOD(results.mapq,256) = tmp.maxq
+2013-10-21 08:51:34
+2013-10-21 08:51:34
+EXCEPTION
+Query (id=1b44182a7ecd58a0:9dd69ffb1cab99a8):
+  Summary:
+    Start Time: 2013-10-21 08:51:34
+    End Time: 2013-10-21 08:51:34
+    Query Type: DML
+    Query State: EXCEPTION
+    Query Status: File hdfs://cn179-ib:8020/user/hive/warehouse/results/000003_0 is invalid.  Invalid file footer: bÒ”ó
+    Impala Version: impalad version 1.0.1 RELEASE (build df844fb967cec8740f08dfb8b21962bc053527ef)
+    User: mniemenm
+    Default Db: default
+    Sql Statement: insert OVERWRITE TABLE results
+SELECT results.*
+FROM results
+JOIN
+  (SELECT pos,
+          tlen,
+          MAX(PMOD(mapq,256)) AS maxq
+   FROM results
+   WHERE flag &amp; 4 = 0
+     AND mapq &lt;&gt; -1
+   GROUP BY pos,
+            tlen) tmp ON results.pos = tmp.pos
+AND results.tlen = tmp.tlen
+WHERE PMOD(results.mapq,256) = tmp.maxq
+    Plan: 
+----------------
+PLAN FRAGMENT 0
+  PARTITION: RANDOM
+
+  WRITE TO HDFS table=default.results
+    overwrite=true
+
+  3:HASH JOIN
+  |  join op: INNER JOIN (BROADCAST)
+  |  hash predicates:
+  |    results.pos = &lt;slot 4&gt;
+  |    results.tlen = &lt;slot 5&gt;
+  |    pmod(results.mapq, 256) = &lt;slot 6&gt;
+  |  tuple ids: 0 2 
+  |  
+  |----6:EXCHANGE
+  |       tuple ids: 2 
+  |    
+  0:SCAN HDFS
+     table=default.results #partitions=1 size=3.13KB
+     tuple ids: 0 
+
+PLAN FRAGMENT 1
+  PARTITION: HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  STREAM DATA SINK
+    EXCHANGE ID: 6
+    UNPARTITIONED
+
+  5:AGGREGATE
+  |  output: MAX(&lt;slot 6&gt;)
+  |  group by: &lt;slot 4&gt;, &lt;slot 5&gt;
+  |  tuple ids: 2 
+  |  
+  4:EXCHANGE
+     tuple ids: 2 
+
+PLAN FRAGMENT 2
+  PARTITION: RANDOM
+
+  STREAM DATA SINK
+    EXCHANGE ID: 4
+    HASH_PARTITIONED: &lt;slot 4&gt;, &lt;slot 5&gt;
+
+  2:AGGREGATE
+  |  output: MAX(pmod(mapq, 256))
+  |  group by: pos, tlen
+  |  tuple ids: 2 
+  |  
+  1:SCAN HDFS
+     table=default.results #partitions=1 size=3.13KB
+     predicates: flag &amp; 4 = 0, mapq != -1
+     tuple ids: 1 
+----------------
+    Query Timeline: 546.92ms
+       - Start execution: 2.65ms (2.65ms)
+       - Planning finished: 12.85ms (10.20ms)
+       - Request finished: 506.884ms (494.798ms)
+       - Unregister query: 545.447ms (38.563ms)
+  ImpalaServer:
+     - ClientFetchWaitTimer: 0ns
+     - RowMaterializationTimer: 0ns
+  Execution Profile 1b44182a7ecd58a0:9dd69ffb1cab99a8:(Active: 494.539ms, % non-child: 0.00%)
+     - FinalizationTimer: 0ns
+    Averaged Fragment 0:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:272.682ms  max:277.855ms  mean: 275.352ms  stddev:1.503ms
+      execution rates: min:1.41 KB/sec  max:1.43 KB/sec  mean:1.42 KB/sec  stddev:8.00 B/sec
+      num instances: 8
+    Averaged Fragment 1:
+      split sizes:  min: 0.00 , max: 0.00 , avg: 0.00 , stddev: 0.00 
+      completion times: min:167.320ms  max:172.336ms  mean: 170.358ms  stddev:1.689ms
+      execution rates: min:0.00 /sec  max:0.00 /sec  mean:0.00 /sec  stddev:0.00 /sec
+      num instances: 8
+    Averaged Fragment 2:
+      split sizes:  min: 400.00 B, max: 400.00 B, avg: 400.00 B, stddev: 0.00 
+      completion times: min:14.21ms  max:21.32ms  mean: 18.594ms  stddev:2.43ms
+      execution rates: min:18.57 KB/sec  max:27.86 KB/sec  mean:21.31 KB/sec  stddev:2.74 KB/sec
+      num instances: 8
+    Fragment 0:
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99a9 (host=cn191:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99aa (host=cn183:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99ab (host=cn184:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99ac (host=cn182:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99ad (host=cn196:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99ae (host=cn181:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99af (host=cn185:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b0 (host=cn187:22000):
+    Fragment 1:
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b1 (host=cn191:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b2 (host=cn183:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b3 (host=cn184:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b4 (host=cn182:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b5 (host=cn196:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b6 (host=cn181:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b7 (host=cn185:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b8 (host=cn187:22000):
+    Fragment 2:
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99b9 (host=cn191:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99ba (host=cn183:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99bb (host=cn184:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99bc (host=cn182:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99bd (host=cn196:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99be (host=cn181:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99bf (host=cn185:22000):
+      Instance 1b44182a7ecd58a0:9dd69ffb1cab99c0 (host=cn187:22000):
